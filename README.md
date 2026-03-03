@@ -22,12 +22,12 @@ This project features a dynamic innings system, live scoreboard, toss logic, pla
 
 ## Preview
 
-![Game Screenshot](screenshot1.png)
-![Game Screenshot](screenshot2.png)
-![Game Screenshot](screenshot3.png)
-![Game Screenshot](screenshot4.png)
-![Game Screenshot](screenshot5.png)
+## Preview
 
----
+![TEAM SET](screenshot1.png)
+![OVER SELECTION ](screenshot2.png)
+![TOSS](screenshot3.png)
+![GAMEPLAY](screenshot4.png)
+![SCORECARD](screenshot5.png)
 
 **Author:** Chinmay Prakash Rout
