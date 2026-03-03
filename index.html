@@ -1,0 +1,1175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<title>Elite Cricket League</title>
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Rajdhani:wght@500;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg0:#050816;
+    --bg1:#071a3a;
+    --glass: rgba(9, 18, 44, .72);
+    --glass2: rgba(255,255,255,.06);
+    --line: rgba(255,255,255,.12);
+
+    --primary:#00d2ff;
+    --secondary:#3a7bd5;
+    --accent:#ffd700;
+    --danger:#ff3b30;
+    --ok:#22c55e;
+
+    --text:#eaf2ff;
+    --muted: rgba(234,242,255,.72);
+
+    --shadow: 0 18px 60px rgba(0,0,0,.55);
+    --shadow2: 0 10px 22px rgba(0,0,0,.45);
+
+    --radius: 18px;
+    --radius2: 14px;
+
+    --maxw: 520px;
+  }
+
+  /* Themes */
+  [data-theme="midnight"]{
+    --primary:#00d2ff; --secondary:#3a7bd5; --accent:#ffd700;
+  }
+  [data-theme="neon"]{
+    --primary:#00ffa8; --secondary:#7c3aed; --accent:#ffea00;
+  }
+  [data-theme="classic"]{
+    --primary:#60a5fa; --secondary:#1d4ed8; --accent:#f59e0b;
+  }
+
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    font-family: Rajdhani, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+    color:var(--text);
+    background: radial-gradient(1200px 600px at 20% 0%, rgba(0,210,255,.18), transparent 55%),
+                radial-gradient(900px 500px at 90% 20%, rgba(58,123,213,.20), transparent 55%),
+                linear-gradient(180deg, var(--bg0), #01030a 55%, #000);
+    overflow-x:hidden;
+  }
+
+  /* Stadium backdrop (lightweight) */
+  .stadium{
+    position:fixed; inset:0;
+    background-image:
+      radial-gradient(1200px 700px at 50% 10%, rgba(255,215,0,.10), transparent 55%),
+      radial-gradient(900px 600px at 50% 60%, rgba(0,210,255,.10), transparent 60%);
+    pointer-events:none;
+    opacity:.95;
+  }
+
+  /* Subtle animated sweep */
+  .sweep{
+    position:fixed; inset:-40%;
+    background: conic-gradient(from 180deg at 50% 50%,
+      transparent 0deg, rgba(0,210,255,.06) 50deg,
+      transparent 120deg, rgba(255,215,0,.05) 170deg,
+      transparent 260deg, rgba(58,123,213,.06) 310deg, transparent 360deg);
+    filter: blur(16px);
+    animation: spin 18s linear infinite;
+    pointer-events:none;
+    opacity:.55;
+    transform: translateZ(0);
+    will-change: transform;
+  }
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  /* Grain overlay (cheap) */
+  .grain{
+    position:fixed; inset:0;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.25'/%3E%3C/svg%3E");
+    mix-blend-mode: overlay;
+    opacity:.18;
+    pointer-events:none;
+  }
+
+  header{
+    position:sticky; top:0; z-index:20;
+    padding:12px 14px;
+    background: linear-gradient(90deg, rgba(0,0,0,.82), rgba(10,25,65,.88), rgba(0,0,0,.82));
+    border-bottom:1px solid rgba(255,255,255,.10);
+    backdrop-filter: blur(10px);
+  }
+  .hdr{
+    max-width: var(--maxw);
+    margin:0 auto;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+  }
+  .brand{
+    display:flex; align-items:baseline; gap:10px;
+  }
+  .brand h1{
+    margin:0;
+    font-family:"Bebas Neue", cursive;
+    letter-spacing:2px;
+    font-size:26px;
+    line-height:1;
+  }
+  .brand .tag{
+    font-family:Orbitron, sans-serif;
+    color:var(--accent);
+    font-size:11px;
+    letter-spacing:1px;
+    opacity:.95;
+  }
+  .hdr .iconbtn{
+    border:1px solid rgba(255,255,255,.14);
+    background: rgba(255,255,255,.06);
+    color:var(--text);
+    border-radius:12px;
+    padding:10px 12px;
+    cursor:pointer;
+    transition: transform .15s ease, background .2s ease;
+  }
+  .hdr .iconbtn:active{transform:scale(.98)}
+  .hdr .iconbtn:hover{background: rgba(255,255,255,.10)}
+
+  .wrap{
+    max-width: var(--maxw);
+    margin: 12px auto 26px;
+    padding: 0 14px 28px;
+  }
+
+  .card{
+    background: var(--glass);
+    border:1px solid rgba(255,255,255,.12);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 16px;
+    backdrop-filter: blur(12px);
+  }
+
+  .card + .card{margin-top:12px}
+  .hidden{display:none !important}
+
+  .title{
+    font-family:"Bebas Neue", cursive;
+    letter-spacing:1.8px;
+    font-size:30px;
+    margin:4px 0 12px;
+    text-align:center;
+    color: var(--accent);
+    text-shadow: 0 8px 18px rgba(0,0,0,.5);
+  }
+
+  .row{display:flex; gap:10px}
+  .row > *{flex:1}
+
+  input{
+    width:100%;
+    padding:14px 14px;
+    border-radius: 14px;
+    border:1px solid rgba(0,210,255,.35);
+    background: rgba(0,0,0,.35);
+    color: var(--text);
+    font-size:16px;
+    outline:none;
+    transition: box-shadow .2s ease, border-color .2s ease;
+  }
+  input:focus{
+    border-color: var(--accent);
+    box-shadow: 0 0 0 4px rgba(255,215,0,.14);
+  }
+
+  .btn{
+    width:100%;
+    border:none;
+    cursor:pointer;
+    padding: 14px 14px;
+    border-radius: 14px;
+    font-family:"Bebas Neue", cursive;
+    letter-spacing:1.2px;
+    font-size:18px;
+    color:#000;
+    background: linear-gradient(135deg, var(--accent), #fff);
+    box-shadow: 0 14px 30px rgba(255,215,0,.18);
+    transition: transform .15s ease, filter .2s ease;
+  }
+  .btn:hover{filter:saturate(1.15)}
+  .btn:active{transform: translateY(1px) scale(.99)}
+
+  .btn.alt{
+    background: linear-gradient(135deg, var(--primary), #fff);
+    box-shadow: 0 14px 30px rgba(0,210,255,.12);
+  }
+  .btn.dark{
+    color:var(--text);
+    background: linear-gradient(135deg, rgba(255,255,255,.10), rgba(255,255,255,.03));
+    border:1px solid rgba(255,255,255,.14);
+    box-shadow:none;
+  }
+
+  /* Live strip */
+  .strip{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    padding: 12px 14px;
+    border-radius: var(--radius);
+    background: linear-gradient(90deg, rgba(0,0,0,.72), rgba(12,30,78,.72), rgba(0,0,0,.72));
+    border:1px solid rgba(255,255,255,.10);
+    box-shadow: var(--shadow2);
+  }
+  .live{
+    display:flex; flex-direction:column; gap:6px;
+    min-width: 160px;
+  }
+  .pill{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    width:max-content;
+    padding: 4px 10px;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,.12);
+    background: rgba(255,255,255,.06);
+    font-family: Orbitron, sans-serif;
+    font-size:11px;
+    letter-spacing:.8px;
+  }
+  .dot{
+    width:8px; height:8px; border-radius:99px;
+    background: var(--danger);
+    box-shadow: 0 0 16px rgba(255,59,48,.75);
+    animation: pulse 1.2s ease-in-out infinite;
+  }
+  @keyframes pulse{50%{transform:scale(.7); opacity:.55}}
+  .battingNow{
+    font-family: Orbitron, sans-serif;
+    color: var(--primary);
+    font-size: 12px;
+    letter-spacing:.7px;
+  }
+
+  .bigscore{
+    text-align:right;
+    font-family:"Bebas Neue", cursive;
+    line-height:1;
+    font-size:66px;
+    letter-spacing:1px;
+    text-shadow: 0 10px 26px rgba(0,0,0,.65);
+    white-space:nowrap;
+  }
+  .bigscore .sep{font-size:28px; color: var(--accent)}
+
+  /* Stats grid */
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:12px}
+  .box{
+    padding: 12px;
+    border-radius: var(--radius2);
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.10);
+    transition: transform .2s ease, background .2s ease;
+  }
+  .box:hover{transform: translateY(-2px); background: rgba(255,255,255,.09)}
+  .lbl{
+    text-transform:uppercase;
+    letter-spacing:1px;
+    font-size:11px;
+    color: var(--accent);
+    margin-bottom:6px;
+  }
+  .val{font-size:18px; font-weight:700}
+  .muted{color:var(--muted); font-size:12px}
+
+  /* Target bar */
+  .target{
+    margin-top:12px;
+    border-radius: 14px;
+    padding: 10px 12px;
+    background: linear-gradient(135deg, rgba(255,215,0,.95), rgba(255,255,255,.85));
+    color:#000;
+    font-family: Orbitron, sans-serif;
+    font-size: 12px;
+    letter-spacing: .8px;
+    display:none;
+  }
+  .target strong{font-size:14px}
+
+  /* Controller */
+  .pad{
+    margin-top:12px;
+    display:grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap:12px;
+  }
+  .shot{
+    height:68px;
+    border-radius: 16px;
+    cursor:pointer;
+    border: 1px solid rgba(255,255,255,.12);
+    background: linear-gradient(135deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+    color: var(--text);
+    font-family:"Bebas Neue", cursive;
+    font-size:28px;
+    letter-spacing:1px;
+    box-shadow: 0 10px 18px rgba(0,0,0,.35);
+    transform: translateZ(0);
+    will-change: transform;
+    transition: transform .16s ease, border-color .2s ease, background .2s ease;
+  }
+  .shot:hover{
+    transform: translateY(-2px) scale(1.02);
+    border-color: rgba(0,210,255,.55);
+    background: linear-gradient(135deg, rgba(0,210,255,.18), rgba(255,255,255,.05));
+  }
+  .shot:active{transform: translateY(1px) scale(.995)}
+
+  .log{
+    margin-top:12px;
+    padding: 12px;
+    border-radius: 14px;
+    border:1px solid rgba(255,255,255,.10);
+    background: rgba(0,0,0,.35);
+    color: var(--primary);
+    font-size:15px;
+    min-height: 46px;
+    line-height:1.25;
+  }
+
+  /* Result */
+  .resultTitle{
+    font-family:"Bebas Neue", cursive;
+    font-size:44px;
+    margin: 4px 0 6px;
+    color: var(--accent);
+    text-align:center;
+  }
+  .summary{
+    text-align:center;
+    font-family: Orbitron, sans-serif;
+    font-size: 13px;
+    color: var(--primary);
+    margin: 8px 0 10px;
+  }
+  .margin{
+    text-align:center;
+    font-size:18px;
+    letter-spacing:.6px;
+    margin: 0 0 10px;
+  }
+
+  .motm{
+    border-radius: 16px;
+    border: 1px solid rgba(255,215,0,.35);
+    background: linear-gradient(135deg, rgba(0,0,0,.55), rgba(255,255,255,.06));
+    padding: 14px;
+    margin: 12px 0 4px;
+  }
+
+  table{
+    width:100%;
+    border-collapse: collapse;
+    overflow:hidden;
+    border-radius: 14px;
+    border: 1px solid rgba(255,255,255,.12);
+    margin-top: 10px;
+  }
+  th{
+    text-align:left;
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:1px;
+    background: linear-gradient(90deg, rgba(58,123,213,.85), rgba(0,0,0,.35));
+    padding: 10px;
+  }
+  td{
+    padding: 10px;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+    font-size:14px;
+  }
+  tr:hover td{background: rgba(255,215,0,.10)}
+  .out{color: var(--danger); font-size:11px; margin-left:6px}
+
+  /* Settings drawer */
+  .drawer{
+    position:fixed; top:0; right:0; height:100%; width:min(360px, 92vw);
+    background: rgba(6, 12, 28, .88);
+    border-left: 1px solid rgba(255,255,255,.12);
+    backdrop-filter: blur(14px);
+    transform: translateX(110%);
+    transition: transform .22s ease;
+    z-index:50;
+    padding: 14px;
+  }
+  .drawer.open{transform: translateX(0)}
+  .drawer h3{
+    margin:6px 0 12px;
+    font-family: Orbitron, sans-serif;
+    letter-spacing:.8px;
+    font-size:14px;
+    color: var(--accent);
+  }
+  .toggleRow{
+    display:flex; align-items:center; justify-content:space-between;
+    padding: 10px 10px;
+    border:1px solid rgba(255,255,255,.10);
+    border-radius: 14px;
+    background: rgba(255,255,255,.06);
+    margin-bottom:10px;
+  }
+  .toggleRow span{color:var(--text); font-weight:700}
+  .toggleRow small{color:var(--muted); display:block; margin-top:2px; font-weight:500}
+
+  .sel{
+    width:100%;
+    padding: 12px;
+    border-radius: 14px;
+    border:1px solid rgba(255,255,255,.12);
+    background: rgba(255,255,255,.06);
+    color: var(--text);
+    font-size:14px;
+    outline:none;
+  }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce){
+    .sweep{animation:none}
+    .dot{animation:none}
+    .shot,.box,.btn{transition:none}
+  }
+
+  /* Desktop layout improvements */
+  @media (min-width: 900px){
+    .wrap{max-width: 920px}
+    .twoCol{
+      display:grid;
+      grid-template-columns: 1.05fr .95fr;
+      gap:12px;
+      align-items:start;
+    }
+  }
+</style>
+</head>
+
+<body data-theme="midnight">
+<div class="stadium"></div>
+<div class="sweep"></div>
+<div class="grain"></div>
+
+<header>
+  <div class="hdr">
+    <div class="brand">
+      <h1>GULLY CRICKET LEAGUE</h1>
+      <div class="tag">DREAM • ARCADE • BROADCAST</div>
+    </div>
+    <button class="iconbtn" id="btnSettings" title="Settings">⚙</button>
+  </div>
+</header>
+
+<div class="drawer" id="drawer">
+  <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+    <h3 style="margin:0">SETTINGS</h3>
+    <button class="iconbtn" id="btnClose">✕</button>
+  </div>
+
+  <div class="toggleRow">
+    <div>
+      <span>Sound</span>
+      <small>Light click + wicket/4/6</small>
+    </div>
+    <input type="checkbox" id="togSound" checked>
+  </div>
+
+  <div class="toggleRow">
+    <div>
+      <span>Reduce effects</span>
+      <small>Best for low-end phones</small>
+    </div>
+    <input type="checkbox" id="togLite">
+  </div>
+
+  <h3>Theme</h3>
+  <select class="sel" id="selTheme">
+    <option value="midnight">Midnight Blue</option>
+    <option value="neon">Neon Arena</option>
+    <option value="classic">Classic Day</option>
+  </select>
+
+  <div style="margin-top:12px">
+    <button class="btn dark" id="btnReset">Reset match</button>
+  </div>
+
+  <div style="margin-top:12px; color:var(--muted); font-size:12px; line-height:1.35">
+    Controls: Press <b>1-6</b> to play a shot. Press <b>Space</b> for random.
+  </div>
+</div>
+
+<div class="wrap">
+  <!-- START -->
+  <div id="screenStart" class="card">
+    <div class="title">MATCH REGISTRATION</div>
+    <div class="row">
+      <input id="inUser" placeholder="HOME TEAM NAME" maxlength="18" />
+      <input id="inCPU" placeholder="AWAY TEAM NAME" maxlength="18" />
+    </div>
+    <div style="margin-top:10px">
+      <button class="btn" id="btnCreate">CREATE MATCH</button>
+    </div>
+  </div>
+
+  <!-- FORMAT -->
+  <div id="screenOvers" class="card hidden">
+    <div class="title">SELECT FORMAT</div>
+    <div class="grid2">
+      <button class="btn dark" data-overs="2">2 OVERS</button>
+      <button class="btn dark" data-overs="5">5 OVERS</button>
+      <button class="btn dark" data-overs="6">6 OVERS</button>
+      <button class="btn dark" data-overs="10">10 OVERS</button>
+    </div>
+    <div class="muted" style="text-align:center; margin-top:10px">
+      Faster formats are smoother on mobile.
+    </div>
+  </div>
+
+  <!-- TOSS -->
+  <div id="screenToss" class="card hidden" style="text-align:center;">
+    <div class="title" id="tossTitle">TOSS</div>
+    <div class="grid2">
+      <button class="btn" id="btnOdd">HEADS</button>
+      <button class="btn alt" id="btnEven">TAILS</button>
+    </div>
+    <div class="muted" style="margin-top:10px">
+      Win toss = you decide who bats first (auto for now).
+    </div>
+  </div>
+
+  <!-- GAME -->
+  <div id="screenGame" class="hidden">
+    <div class="twoCol">
+      <div>
+        <div class="strip">
+          <div class="live">
+            <div class="pill"><span class="dot"></span> LIVE</div>
+            <div class="battingNow" id="txtBatNow">-</div>
+          </div>
+          <div class="bigscore">
+            <span id="txtRuns">0</span><span class="sep">/</span><span id="txtWkts">0</span>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:12px">
+          <div class="grid2">
+            <div class="box">
+              <div class="lbl">Overs</div>
+              <div class="val"><span id="txtOvers">0.0</span> <span class="muted">/ <span id="txtMax">0</span></span></div>
+            </div>
+            <div class="box">
+              <div class="lbl">Run Rate</div>
+              <div class="val" id="txtRR">0.00</div>
+            </div>
+          </div>
+
+          <div class="grid2">
+            <div class="box">
+              <div class="lbl">Striker</div>
+              <div class="val" id="txtStriker">-</div>
+              <div class="muted" id="txtStrikerMini">0 (0)</div>
+            </div>
+            <div class="box" style="text-align:right">
+              <div class="lbl">Bowler</div>
+              <div class="val" id="txtBowler">-</div>
+              <div class="muted" id="txtBowlerMini">0 wkts</div>
+            </div>
+          </div>
+
+          <div class="grid2" id="chaseStats" style="display:none">
+            <div class="box">
+              <div class="lbl">Target</div>
+              <div class="val"><span id="txtTarget">-</span></div>
+            </div>
+            <div class="box">
+              <div class="lbl">Req. RR</div>
+              <div class="val" id="txtReqRR">-</div>
+            </div>
+          </div>
+
+          <div class="target" id="targetBar">
+            TARGET: <strong id="txtTargetBar">0</strong> • KEEP THE CHASE ON!
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="card">
+          <div class="lbl" style="text-align:center; font-size:12px; color:var(--primary)">SHOT CONTROLLER</div>
+          <div class="pad">
+            <button class="shot" data-shot="1">1</button>
+            <button class="shot" data-shot="2">2</button>
+            <button class="shot" data-shot="3">3</button>
+            <button class="shot" data-shot="4">4</button>
+            <button class="shot" data-shot="5">5</button>
+            <button class="shot" data-shot="6">6</button>
+          </div>
+          <div style="display:flex; gap:10px; margin-top:10px">
+            <button class="btn dark" id="btnRandom">RANDOM (SPACE)</button>
+            <button class="btn dark" id="btnScoreboard">SCOREBOARD</button>
+          </div>
+          <div class="log" id="txtLog">Waiting for the delivery…</div>
+        </div>
+
+        <div class="card" style="margin-top:12px">
+          <div class="lbl">Highlights</div>
+          <div class="muted" id="txtHighlights" style="line-height:1.35">
+            No highlights yet.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULT -->
+  <div id="screenResult" class="hidden">
+    <div class="card">
+      <div class="resultTitle" id="txtFinal">-</div>
+      <div class="summary" id="txtSummary">-</div>
+      <div class="margin" id="txtMargin">-</div>
+
+      <div class="motm" id="motmBox"></div>
+
+      <div id="finalTables"></div>
+
+      <div style="margin-top:14px">
+        <button class="btn alt" id="btnAgain">PLAY ANOTHER MATCH</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Scoreboard modal (lightweight) -->
+<div id="modal" class="hidden" style="position:fixed; inset:0; z-index:80; background:rgba(0,0,0,.62); display:flex; align-items:flex-end; justify-content:center; padding:12px;">
+  <div class="card" style="width:min(920px, 100%); max-height:78vh; overflow:auto;">
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+      <div class="title" style="font-size:26px; margin:0">SCOREBOARD</div>
+      <button class="iconbtn" id="btnModalClose">✕</button>
+    </div>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+/* ---------------------------
+   Performance-first helpers
+----------------------------*/
+const $ = (id) => document.getElementById(id);
+const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
+const fmtOv = (balls) => `${Math.floor(balls/6)}.${balls%6}`;
+
+const FX = {
+  sound: true,
+  lite: false,
+  theme: 'midnight',
+};
+
+function vibrate(ms=20){
+  if (navigator.vibrate) navigator.vibrate(ms);
+}
+
+function beep(type="tap"){
+  if(!FX.sound) return;
+  // Tiny WebAudio synth (no external files) — very light
+  try{
+    const ctx = beep.ctx || (beep.ctx = new (window.AudioContext||window.webkitAudioContext)());
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.type = "sine";
+    const now = ctx.currentTime;
+
+    const map = {
+      tap: [420, .025],
+      four: [620, .06],
+      six: [740, .08],
+      wkt: [180, .12],
+      end: [320, .09]
+    };
+    const [freq, dur] = map[type] || map.tap;
+
+    o.frequency.setValueAtTime(freq, now);
+    g.gain.setValueAtTime(0.0001, now);
+    g.gain.exponentialRampToValueAtTime(0.12, now + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, now + dur);
+
+    o.connect(g); g.connect(ctx.destination);
+    o.start(now);
+    o.stop(now + dur + 0.02);
+  }catch(e){}
+}
+
+/* ---------------------------
+   Players DB (yours, kept)
+----------------------------*/
+const PLAYERS_DB = [
+  { name: 'Virat Kohli', role: 'B' }, { name: 'Rohit Sharma', role: 'B' },
+  { name: 'Joe Root', role: 'B' }, { name: 'Kane Williamson', role: 'B' },
+  { name: 'Steve Smith', role: 'B' }, { name: 'Babar Azam', role: 'B' },
+  { name: 'Shubman Gill', role: 'B' }, { name: 'Suryakumar Yadav', role: 'B' },
+  { name: 'Harry Brook', role: 'B' }, { name: 'Daryl Mitchell', role: 'B' },
+  { name: 'Yashasvi Jaiswal', role: 'B' }, { name: 'Rishabh Pant', role: 'B' },
+  { name: 'Quinton de Kock', role: 'B' }, { name: 'Mohammad Rizwan', role: 'B' },
+  { name: 'David Warner', role: 'B' }, { name: 'Usman Khawaja', role: 'B' },
+  { name: 'Aiden Markram', role: 'B' }, { name: 'Pathum Nissanka', role: 'B' },
+  { name: 'Shai Hope', role: 'B' }, { name: 'Kusal Mendis', role: 'B' },
+  { name: 'Temba Bavuma', role: 'B' }, { name: 'Marnus Labuschagne', role: 'B' },
+  { name: 'Charith Asalanka', role: 'B' }, { name: 'Phil Salt', role: 'B' },
+  { name: 'Jos Buttler', role: 'B' }, { name: 'Devon Conway', role: 'B' },
+  { name: 'Ibrahim Zadran', role: 'B' },
+  { name: 'Sachin Tendulkar', role: 'B' }, { name: 'Don Bradman', role: 'B' },
+  { name: 'Brian Lara', role: 'B' }, { name: 'Ricky Ponting', role: 'B' },
+  { name: 'Rahul Dravid', role: 'B' }, { name: 'Kumar Sangakkara', role: 'B' },
+  { name: 'Alastair Cook', role: 'B' }, { name: 'Sunil Gavaskar', role: 'B' },
+  { name: 'Viv Richards', role: 'B' }, { name: 'Hashim Amla', role: 'B' },
+  { name: 'Mahela Jayawardene', role: 'B' }, { name: 'MS Dhoni', role: 'B' },
+  { name: 'AB de Villiers', role: 'B' }, { name: 'Matthew Hayden', role: 'B' },
+  { name: 'Inzamam-ul-Haq', role: 'B' }, { name: 'VVS Laxman', role: 'B' },
+  { name: 'Brendon McCullum', role: 'B' },
+  { name: 'Ben Stokes', role: 'A' }, { name: 'Hardik Pandya', role: 'A' },
+  { name: 'Ravindra Jadeja', role: 'A' }, { name: 'Axar Patel', role: 'A' },
+  { name: 'Shakib Al Hasan', role: 'A' }, { name: 'Mitchell Santner', role: 'A' },
+  { name: 'Mehidy Hasan Miraz', role: 'A' }, { name: 'Marco Jansen', role: 'A' },
+  { name: 'Sikandar Raza', role: 'A' }, { name: 'Mohammad Nabi', role: 'A' },
+  { name: 'Glenn Maxwell', role: 'A' }, { name: 'Wiaan Mulder', role: 'A' },
+  { name: 'Jason Holder', role: 'A' }, { name: 'Azmatullah Omarzai', role: 'A' },
+  { name: 'Dhananjaya de Silva', role: 'A' }, { name: 'Rachin Ravindra', role: 'A' },
+  { name: 'Sean Williams', role: 'A' },
+  { name: 'Jacques Kallis', role: 'A' }, { name: 'Imran Khan', role: 'A' },
+  { name: 'Kapil Dev', role: 'A' }, { name: 'Ian Botham', role: 'A' },
+  { name: 'Andrew Flintoff', role: 'A' }, { name: 'Sanath Jayasuriya', role: 'A' },
+  { name: 'Shane Watson', role: 'A' }, { name: 'Abdul Razzaq', role: 'A' },
+  { name: 'Shahid Afridi', role: 'A' },
+  { name: 'Jasprit Bumrah', role: 'W' }, { name: 'Kagiso Rabada', role: 'W' },
+  { name: 'Pat Cummins', role: 'W' }, { name: 'Mitchell Starc', role: 'W' },
+  { name: 'Josh Hazlewood', role: 'W' }, { name: 'Matt Henry', role: 'W' },
+  { name: 'Rashid Khan', role: 'W' }, { name: 'Shaheen Afridi', role: 'W' },
+  { name: 'Nathan Lyon', role: 'W' }, { name: 'Keshav Maharaj', role: 'W' },
+  { name: 'Ravi Ashwin', role: 'W' }, { name: 'Wanindu Hasaranga', role: 'W' },
+  { name: 'Kuldeep Yadav', role: 'W' }, { name: 'Trent Boult', role: 'W' },
+  { name: 'Adam Zampa', role: 'W' }, { name: 'Adil Rashid', role: 'W' },
+  { name: 'Mohammed Shami', role: 'W' }, { name: 'Mohammed Siraj', role: 'W' },
+  { name: 'Tim Southee', role: 'W' }, { name: 'Mustafizur Rahman', role: 'W' },
+  { name: 'Muttiah Muralitharan', role: 'W' }, { name: 'Shane Warne', role: 'W' },
+  { name: 'Wasim Akram', role: 'W' }, { name: 'Glenn McGrath', role: 'W' },
+  { name: 'Dale Steyn', role: 'W' }, { name: 'Anil Kumble', role: 'W' },
+  { name: 'Waqar Younis', role: 'W' }, { name: 'James Anderson', role: 'W' },
+  { name: 'Malcolm Marshall', role: 'W' }, { name: 'Brett Lee', role: 'W' }
+];
+
+/* ---------------------------
+   Game state
+----------------------------*/
+let G = null;
+
+function newGame(){
+  G = {
+    overs: 0,
+    inn: 1,
+    batting: '', // 'User' | 'CPU'
+    uName: '',
+    cName: '',
+
+    runs: 0,
+    wkts: 0,
+    ballsThisOver: 0,
+    ballsTotal: 0,
+
+    target: null,
+    i1: { name:'', runs:0, wkts:0 },
+
+    striker: 0,
+    nonStriker: 1,
+    nextBatterIdx: 2,
+
+    bowlerIdx: 0,
+
+    uTeam: [],
+    cTeam: [],
+
+    lastBalls: [],
+    highlights: [],
+    overBuffer: [], // last over events
+  };
+}
+
+function setupTeam(){
+  const shuf = (a) => a.slice().sort(()=>Math.random()-0.5);
+  const bats = shuf(PLAYERS_DB.filter(p=>p.role==='B')).slice(0,5);
+  const alls = shuf(PLAYERS_DB.filter(p=>p.role==='A')).slice(0,2);
+  const bowl = shuf(PLAYERS_DB.filter(p=>p.role==='W')).slice(0,4);
+  // 11 players
+  return [...bats, ...alls, ...bowl].map(p=>({
+    name:p.name,
+    role:p.role,
+    runs:0, balls:0, wkts:0,
+    out:false
+  }));
+}
+
+function showScreen(id){
+  ["screenStart","screenOvers","screenToss","screenGame","screenResult"].forEach(x=>$(x).classList.add("hidden"));
+  $(id).classList.remove("hidden");
+}
+
+function teamBatting(){
+  return (G.batting === "User") ? G.uTeam : G.cTeam;
+}
+function teamBowling(){
+  return (G.batting === "User") ? G.cTeam : G.uTeam;
+}
+function currentBowler(){
+  const bowlers = teamBowling().slice(5);
+  return bowlers[G.bowlerIdx % bowlers.length];
+}
+function strikerObj(){ return teamBatting()[G.striker]; }
+function nonStrikerObj(){ return teamBatting()[G.nonStriker]; }
+
+function swapStrike(){
+  [G.striker, G.nonStriker] = [G.nonStriker, G.striker];
+}
+
+function addHighlight(text){
+  G.highlights.unshift(text);
+  if(G.highlights.length > 6) G.highlights.pop();
+  $("txtHighlights").innerHTML = G.highlights.map(x=>`• ${x}`).join("<br>");
+}
+
+function aiPick(isBattingSideCPU){
+  // Smarter in chase: if RRR high, swing harder
+  if(G.inn === 2 && isBattingSideCPU){
+    const ballsLeft = G.overs*6 - G.ballsTotal;
+    const need = (G.target - G.runs);
+    if(ballsLeft > 0){
+      const req = (need / (ballsLeft/6));
+      if(req > 12 && Math.random() < 0.55) return [4,6][Math.floor(Math.random()*2)];
+      if(req > 9 && Math.random() < 0.40) return [3,4,6][Math.floor(Math.random()*3)];
+    }
+  }
+  // Pattern repeat sometimes
+  if(G.lastBalls.length >= 2){
+    const a = G.lastBalls[G.lastBalls.length-1];
+    const b = G.lastBalls[G.lastBalls.length-2];
+    if(a === b && Math.random() < 0.22) return a;
+  }
+  return Math.floor(Math.random()*6)+1;
+}
+
+function playBall(userShot){
+  if(!G || G.overs<=0) return;
+
+  vibrate(18);
+  beep("tap");
+
+  // store last balls
+  G.lastBalls.push(userShot);
+  if(G.lastBalls.length>3) G.lastBalls.shift();
+
+  const cpuShot = aiPick(G.batting === "CPU");
+  const isWicket = (userShot === cpuShot); // your original rule
+
+  const batter = strikerObj();
+  const bowler = currentBowler();
+
+  // ball increments
+  G.ballsTotal++;
+  G.ballsThisOver++;
+  batter.balls++;
+
+  let eventTxt = "";
+  let symbol = "";
+
+  if(isWicket){
+    G.wkts++;
+    batter.out = true;
+    bowler.wkts++;
+
+    eventTxt = `WICKET! ${batter.name.split(" ").pop()} gone!`;
+    symbol = "W";
+    beep("wkt");
+    addHighlight(`🔥 WICKET: ${batter.name} b ${bowler.name}`);
+
+    // new batter comes in
+    const next = G.nextBatterIdx;
+    G.nextBatterIdx++;
+    // if all out (no batter left)
+    if(next < teamBatting().length){
+      G.striker = next;
+    }
+  }else{
+    const runs = (G.batting === "User") ? userShot : cpuShot;
+    G.runs += runs;
+    batter.runs += runs;
+
+    if(runs === 4){beep("four"); addHighlight(`✨ FOUR by ${batter.name.split(" ").pop()}!`); symbol="4";}
+    else if(runs === 6){beep("six"); addHighlight(`💥 SIX! ${batter.name.split(" ").pop()} into the stands!`); symbol="6";}
+    else {symbol = String(runs);}
+
+    eventTxt = `${batter.name.split(" ").pop()} scores ${runs}`;
+    // strike rotation on odd runs
+    if(runs % 2 === 1) swapStrike();
+  }
+
+  G.overBuffer.push(symbol);
+  $("txtLog").textContent = eventTxt;
+
+  // Chase complete
+  if(G.inn === 2 && G.runs >= G.target){
+    endMatch(true);
+    return;
+  }
+
+  // End of over
+  if(G.ballsThisOver === 6){
+    G.ballsThisOver = 0;
+    G.bowlerIdx++;
+
+    // swap strike at over end
+    swapStrike();
+
+    // over summary highlight
+    const ovNo = Math.floor((G.ballsTotal-1)/6) + 1;
+    addHighlight(`Over ${ovNo}: ${G.overBuffer.join(" ")} • Score ${G.runs}/${G.wkts}`);
+    G.overBuffer = [];
+
+    $("txtLog").textContent = `End of over. Bowling change.`;
+  }
+
+  // Innings / match end conditions
+  const maxBalls = G.overs * 6;
+  const allOut = (G.wkts >= 10);
+  const ballsUp = (G.ballsTotal >= maxBalls);
+
+  if(allOut || ballsUp){
+    if(G.inn === 1) startSecondInnings();
+    else endMatch(false);
+    return;
+  }
+
+  render();
+}
+
+function startSecondInnings(){
+  // Save first innings
+  G.i1 = { name: (G.batting==="User")?G.uName:G.cName, runs:G.runs, wkts:G.wkts };
+  G.target = G.runs + 1;
+
+  // Reset innings state
+  G.inn = 2;
+  G.runs = 0; G.wkts = 0;
+  G.ballsThisOver = 0; G.ballsTotal = 0;
+  G.striker = 0; G.nonStriker = 1; G.nextBatterIdx = 2;
+  G.bowlerIdx = 0;
+  G.lastBalls = [];
+  G.overBuffer = [];
+
+  // Switch batting side
+  G.batting = (G.batting==="User") ? "CPU" : "User";
+
+  $("targetBar").style.display = "block";
+  $("txtTargetBar").textContent = G.target;
+  $("chaseStats").style.display = "grid";
+  $("txtTarget").textContent = G.target;
+
+  addHighlight(`🎯 Target set: ${G.target}`);
+  render();
+}
+
+function endMatch(chased){
+  showScreen("screenResult");
+  beep("end");
+
+  const chaseTeam = (G.batting==="User") ? G.uName : G.cName;
+  const defendTeam = G.i1.name || ((G.batting==="User") ? G.cName : G.uName);
+
+  let title="", margin="";
+  if(G.inn===2 && G.runs >= G.target){
+    title = `${chaseTeam} VICTORIOUS`;
+    const ballsRemaining = (G.overs*6) - G.ballsTotal;
+    margin = `Won by ${10 - G.wkts} wickets (${ballsRemaining} balls remaining)`;
+  }else if(G.inn===2 && G.runs === G.target-1){
+    title = `MATCH TIED`;
+    margin = `A dramatic draw`;
+  }else{
+    title = `${defendTeam} VICTORIOUS`;
+    margin = `Won by ${(G.target-1) - G.runs} runs`;
+  }
+
+  $("txtFinal").textContent = title;
+  $("txtMargin").textContent = margin;
+
+  const i1Name = G.i1.name || defendTeam;
+  $("txtSummary").textContent =
+    `${i1Name} ${G.i1.runs}/${G.i1.wkts}  vs  ${chaseTeam} ${G.runs}/${G.wkts}`;
+
+  // Player of match
+  const all = [...G.uTeam, ...G.cTeam];
+  const best = all.reduce((p,c)=> (c.runs + c.wkts*25) > (p.runs + p.wkts*25) ? c : p, all[0]);
+
+  $("motmBox").innerHTML = `
+    <div class="lbl">PLAYER OF THE MATCH</div>
+    <div style="font-family:'Bebas Neue'; font-size:26px; letter-spacing:1px">${best.name.toUpperCase()}</div>
+    <div class="muted" style="margin-top:4px">${best.runs} runs • ${best.wkts} wickets</div>
+  `;
+
+  // Tables
+  renderTables($("finalTables"));
+}
+
+function render(){
+  const battingName = (G.batting==="User") ? G.uName : G.cName;
+  $("txtBatNow").textContent = `INNINGS ${G.inn} • ${battingName} BATTING`;
+  $("txtRuns").textContent = G.runs;
+  $("txtWkts").textContent = G.wkts;
+  $("txtOvers").textContent = fmtOv(G.ballsTotal);
+
+  const rr = (G.ballsTotal>0) ? (G.runs / (G.ballsTotal/6)) : 0;
+  $("txtRR").textContent = rr.toFixed(2);
+
+  $("txtMax").textContent = G.overs;
+
+  const s = strikerObj();
+  const b = currentBowler();
+
+  $("txtStriker").textContent = s ? s.name : "ALL OUT";
+  $("txtStrikerMini").textContent = s ? `${s.runs} (${s.balls})` : "";
+
+  $("txtBowler").textContent = b ? b.name : "-";
+  $("txtBowlerMini").textContent = b ? `${b.wkts} wkts` : "-";
+
+  if(G.inn === 2){
+    $("chaseStats").style.display = "grid";
+    $("txtTarget").textContent = G.target;
+
+    const ballsLeft = (G.overs*6) - G.ballsTotal;
+    const need = (G.target - G.runs);
+    const req = (ballsLeft>0) ? (need / (ballsLeft/6)) : Infinity;
+    $("txtReqRR").textContent = (req===Infinity) ? "-" : clamp(req,0,99).toFixed(2);
+  }else{
+    $("chaseStats").style.display = "none";
+  }
+}
+
+function renderTables(container){
+  const mkTable = (teamName, players) => `
+    <h3 style="font-family:'Bebas Neue'; letter-spacing:1px; color:var(--primary); margin:12px 0 6px">${teamName}</h3>
+    <table>
+      <thead><tr><th>Player</th><th>R</th><th>B</th><th>W</th></tr></thead>
+      <tbody>
+        ${players.map(p=>`
+          <tr>
+            <td>${p.name}${p.out ? `<span class="out">(O)</span>`:""}</td>
+            <td>${p.runs}</td>
+            <td>${p.balls}</td>
+            <td>${p.wkts}</td>
+          </tr>
+        `).join("")}
+      </tbody>
+    </table>
+  `;
+
+  container.innerHTML = mkTable(G.uName, G.uTeam) + mkTable(G.cName, G.cTeam);
+}
+
+function openModal(){
+  $("modal").classList.remove("hidden");
+  renderTables($("modalBody"));
+}
+function closeModal(){
+  $("modal").classList.add("hidden");
+}
+
+/* ---------------------------
+   UI wires
+----------------------------*/
+newGame();
+
+$("btnSettings").onclick = ()=> $("drawer").classList.add("open");
+$("btnClose").onclick = ()=> $("drawer").classList.remove("open");
+$("btnReset").onclick = ()=> location.reload();
+
+$("togSound").onchange = (e)=> FX.sound = e.target.checked;
+$("togLite").onchange = (e)=>{
+  FX.lite = e.target.checked;
+  // Lite mode: stop sweep animation + reduce grain/blur
+  document.querySelector(".sweep").style.display = FX.lite ? "none" : "block";
+  document.querySelector(".grain").style.opacity = FX.lite ? ".10" : ".18";
+  // could also reduce backdrop-filter by removing (kept simple)
+};
+$("selTheme").onchange = (e)=>{
+  FX.theme = e.target.value;
+  document.body.setAttribute("data-theme", FX.theme);
+};
+
+$("btnCreate").onclick = ()=>{
+  G.uName = ($("inUser").value.trim().toUpperCase() || "HOME").slice(0,18);
+  G.cName = ($("inCPU").value.trim().toUpperCase() || "AWAY").slice(0,18);
+  showScreen("screenOvers");
+};
+
+$("screenOvers").addEventListener("click",(e)=>{
+  const btn = e.target.closest("button[data-overs]");
+  if(!btn) return;
+  const n = +btn.dataset.overs;
+  G.overs = n;
+  G.uTeam = setupTeam();
+  G.cTeam = setupTeam();
+  $("tossTitle").textContent = `${G.uName}: CALL THE TOSS`;
+  $("txtMax").textContent = n;
+  showScreen("screenToss");
+});
+
+$("btnOdd").onclick = ()=> toss("odd");
+$("btnEven").onclick = ()=> toss("even");
+
+function toss(choice){
+  const win = Math.random() < 0.5 ? "odd" : "even";
+  const userWon = (choice === win);
+
+  // Auto decision: toss winner bats first (you can make a choose screen later)
+  G.batting = userWon ? "User" : "CPU";
+  showScreen("screenGame");
+
+  $("txtLog").textContent = userWon ? `${G.uName} won the toss and will bat first.` : `${G.cName} won the toss and will bat first.`;
+  addHighlight(`Toss: ${userWon ? G.uName : G.cName} won`);
+
+  $("targetBar").style.display = "none";
+  $("chaseStats").style.display = "none";
+  render();
+}
+
+// shots
+document.querySelectorAll(".shot").forEach(b=>{
+  b.onclick = ()=> playBall(+b.dataset.shot);
+});
+
+$("btnRandom").onclick = ()=> playBall(Math.floor(Math.random()*6)+1);
+$("btnScoreboard").onclick = openModal;
+$("btnModalClose").onclick = closeModal;
+$("modal").addEventListener("click",(e)=>{
+  if(e.target.id === "modal") closeModal();
+});
+
+// keyboard (PC)
+window.addEventListener("keydown",(e)=>{
+  if($("screenGame").classList.contains("hidden")) return;
+  if(e.code === "Space"){ e.preventDefault(); $("btnRandom").click(); return; }
+  const k = e.key;
+  if(["1","2","3","4","5","6"].includes(k)) playBall(+k);
+});
+
+$("btnAgain").onclick = ()=> location.reload();
+</script>
+</body>
+</html>
